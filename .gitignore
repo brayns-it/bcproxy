@@ -1,0 +1,7 @@
+/bin
+/obj
+/.vs
+/packages
+/BCProxy.csproj.user
+/Properties/PublishProfiles
+endpoints.json
