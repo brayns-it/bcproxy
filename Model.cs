@@ -23,6 +23,7 @@
             public string internalUrl = "";
             public string login = "";
             public string password = "";
+            public bool return200inError = false;
 
             public List<Token> tokens = new();
         }

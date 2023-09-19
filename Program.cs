@@ -18,12 +18,14 @@ namespace BCProxy
             endpointsFile = builder.Environment.ContentRootPath + "/endpoints.json";
 
             var app = builder.Build();
-            app.MapPost("/{path:alpha}", Execute);
+            app.MapPost("/{**path}", Execute);
             app.Run();
         }
 
-        static async void Execute(HttpContext httpContext)
+        static async Task Execute(HttpContext httpContext)
         {
+            Endpoints.Endpoint? target = null;
+
             try
             {
                 if (!File.Exists(endpointsFile))
@@ -39,8 +41,6 @@ namespace BCProxy
                 if (!auth.StartsWith("Bearer "))
                     throw new Exception("Invalid authentication");
                 auth = auth.Substring(7);
-
-                Endpoints.Endpoint? target = null;
 
                 foreach (var end in ends!.endpoints)
                 {
@@ -94,7 +94,8 @@ namespace BCProxy
 
                 var intResponse = intClient.Send(intRequest);
 
-                httpContext.Response.StatusCode = Convert.ToInt32(intResponse.StatusCode);
+                if (!target.return200inError)
+                    httpContext.Response.StatusCode = Convert.ToInt32(intResponse.StatusCode);
                 httpContext.Response.ContentType = intResponse.Content.Headers.ContentType!.ToString();
 
                 ms.Close();
@@ -106,7 +107,8 @@ namespace BCProxy
             }
             catch (Exception ex)
             {
-                httpContext.Response.StatusCode = 500;
+                if ((target == null) || (!target.return200inError))
+                    httpContext.Response.StatusCode = 500;
                 httpContext.Response.ContentType = "application/json";
 
                 var res = new ErrorResponse(ex);
