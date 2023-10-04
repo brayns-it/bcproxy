@@ -18,6 +18,7 @@ namespace BCProxy
             endpointsFile = builder.Environment.ContentRootPath + "/endpoints.json";
 
             var app = builder.Build();
+            app.MapPost("/companies/{id}/{**path}", Execute);
             app.MapPost("/{**path}", Execute);
             app.Run();
         }
@@ -75,6 +76,9 @@ namespace BCProxy
                     sw.Write(JObject.FromObject(ends).ToString(Newtonsoft.Json.Formatting.Indented));
                     sw.Close();
                 }
+
+                if (httpContext.Request.RouteValues.ContainsKey("id"))
+                    target.internalUrl = target.internalUrl.Replace("{id}", httpContext.Request.RouteValues["id"]!.ToString()!);
 
                 var intHandler = new HttpClientHandler();
                 intHandler.Credentials = new NetworkCredential(target.login, DecryptString(target.password));
