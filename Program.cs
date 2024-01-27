@@ -89,6 +89,9 @@ namespace BCProxy
                 intRequest.Method = HttpMethod.Post;
                 intRequest.RequestUri = new Uri(target.internalUrl);
 
+                if (httpContext.Request.Headers.ContainsKey("SOAPAction"))
+                    intRequest.Headers.Add("SOAPAction", httpContext.Request.Headers["SOAPAction"].ToString());
+
                 var ms = new MemoryStream();
                 await httpContext.Request.Body.CopyToAsync(ms);
 
